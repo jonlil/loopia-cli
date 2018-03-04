@@ -1,0 +1,8 @@
+[package]
+name = "loopia"
+version = "0.1.0"
+authors = ["Jonas Liljestrand <jonas.liljestrand@gmail.com>"]
+
+[dependencies]
+xmlrpc = "0.11.0"
+reqwest = "0.8.5"
