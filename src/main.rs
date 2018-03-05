@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate dotenv_codegen;
+
 mod api;
 
 use api::{
@@ -7,8 +10,8 @@ use api::{
 
 fn main() {
     let client = ApiClient::new(
-        String::from("<username>"),
-        String::from("<password>")
+        String::from(dotenv!("LOOPIA_USERNAME")),
+        String::from(dotenv!("LOOPIA_PASSWORD"))
     );
 
     client.get_zone_records(&GetZoneRecordsRequest {
