@@ -6,3 +6,4 @@ authors = ["Jonas Liljestrand <jonas.liljestrand@gmail.com>"]
 [dependencies]
 xmlrpc = "0.11.0"
 reqwest = "0.8.5"
+dotenv_codegen = "0.11.0"
