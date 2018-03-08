@@ -31,11 +31,13 @@ fn main() {
         ("domain", Some(domain_matches)) => {
             match domain_matches.subcommand() {
                 ("get-zone-records", Some(command)) => {
-                    client.get_zone_records(&GetZoneRecordsRequest {
+                    for record in client.get_zone_records(&GetZoneRecordsRequest {
                         domain: command.value_of("domain").unwrap(),
                         subdomain: command.value_of("subdomain").unwrap_or("@"),
                         customer_number: None
-                    });
+                    }) {
+                        println!("{:#?}", record);
+                    }
                 },
                 _ => unreachable!()
             }
