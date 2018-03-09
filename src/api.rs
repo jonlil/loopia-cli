@@ -29,7 +29,14 @@ pub struct GetZoneRecordsRequest<'a> {
     pub subdomain: &'a str,
 }
 
-pub struct GetZoneRecordsResultError {}
+impl<'a> GetZoneRecordsRequest<'a> {
+    fn customer_number(&self) -> Value {
+        return match self.customer_number.is_none() {
+            false => Value::from(self.customer_number.unwrap()),
+            true => Value::from(String::new())
+        };
+    }
+}
 
 impl ApiClient {
     pub fn new(username: String, password: String) -> Self {
@@ -46,15 +53,10 @@ impl ApiClient {
         &self,
         parameters: &GetZoneRecordsRequest
     ) -> Vec<ZoneRecord> {
-        let customer_number = match parameters.customer_number.is_none() {
-            false => Value::from(parameters.customer_number.unwrap()),
-            true => Value::from(String::new())
-        };
-
         let xml_client = Request::new("getZoneRecords")
             .arg(Value::from(self.username.to_owned()))
             .arg(Value::from(self.password.to_owned()))
-            .arg(customer_number.to_owned())
+            .arg(parameters.customer_number().to_owned())
             .arg(Value::from(parameters.domain))
             .arg(Value::from(parameters.subdomain));
 
