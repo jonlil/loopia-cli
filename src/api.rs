@@ -20,6 +20,8 @@ pub struct ApiClient {
 pub struct ZoneRecord {
     id: i32,
     data: String,
+    ttl: i32,
+    priority: i32,
     type_: String,
 }
 
@@ -68,6 +70,8 @@ impl ApiClient {
                         zone_records.push(ZoneRecord {
                             id: x["record_id"].as_i32().unwrap(),
                             data: x["rdata"].as_str().unwrap().to_string(),
+                            ttl: x["ttl"].as_i32().unwrap(),
+                            priority: x["priority"].as_i32().unwrap(),
                             type_: x["type"].as_str().unwrap().to_string()
                         });
                     }
