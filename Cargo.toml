@@ -1,6 +1,6 @@
 [package]
 name = "loopia-cli"
-version = "0.2.1"
+version = "0.3.0"
 authors = ["Jonas Liljestrand <jonas.liljestrand@gmail.com>"]
 
 [dependencies]
