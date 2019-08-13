@@ -5,5 +5,5 @@ authors = ["Jonas Liljestrand <jonas.liljestrand@gmail.com>"]
 
 [dependencies]
 xmlrpc = "0.11.0"
-reqwest = "0.8.5"
+reqwest = "0.9.19"
 clap = "2.30.0"
