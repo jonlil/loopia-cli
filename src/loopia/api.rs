@@ -1,12 +1,7 @@
-extern crate xmlrpc;
-extern crate reqwest;
-
 use std::collections::BTreeMap;
-
-use self::reqwest::Url;
-use self::xmlrpc::{Value, Request};
-
-pub type ZoneRecords = Vec<ZoneRecord>;
+use reqwest::Url;
+use xmlrpc::{Value, Request};
+use super::{ZoneRecord, ZoneRecords};
 
 pub struct ApiClient {
     username: String,
@@ -14,27 +9,18 @@ pub struct ApiClient {
     url: Url,
 }
 
-#[derive(Debug)]
-pub struct ZoneRecord {
-    pub id: Option<i32>,
-    pub data: String,
-    pub ttl: i32,
-    pub priority: i32,
-    pub type_: String,
-}
-
 impl From<ZoneRecord> for BTreeMap<String, Value> {
     fn from(zone_record: ZoneRecord) -> BTreeMap<String, Value> {
         let mut record_data = BTreeMap::new();
 
         if let Some(id) = zone_record.id {
-            record_data.insert(String::from("record_id"), Value::from(id));
+            record_data.insert("record_id".to_string(), Value::from(id));
         }
 
-        record_data.insert(String::from("rdata"), Value::from(zone_record.data));
-        record_data.insert(String::from("ttl"), Value::from(zone_record.ttl));
-        record_data.insert(String::from("priority"), Value::from(zone_record.priority));
-        record_data.insert(String::from("type"), Value::from(zone_record.type_));
+        record_data.insert("rdata".to_string(), Value::from(zone_record.data));
+        record_data.insert("ttl".to_string(), Value::from(zone_record.ttl));
+        record_data.insert("priority".to_string(), Value::from(zone_record.priority));
+        record_data.insert("type".to_string(), Value::from(zone_record.type_));
 
         record_data
     }
@@ -107,7 +93,7 @@ impl<'a> ApiClient {
                             type_: x["type"].as_str().unwrap().to_string()
                         }
                     })
-                    .collect::<Vec<ZoneRecord>>())
+                    .collect::<ZoneRecords>())
                 } else {
                     panic!("Failed executing: getZoneRecords")
                 }
@@ -156,7 +142,7 @@ impl<'a> ApiClient {
         }
     }
 
-    pub fn update_zone_record(&self, parameters: UpdateZoneRecordRequest) -> Result<(), &'static str> {
+    pub fn update_zone_record(&self, parameters: UpdateZoneRecordRequest) -> Result<Value, &'static str> {
         let xml_client = self.xml_client("updateZoneRecord")
             .arg(customer_number(parameters.customer_number).to_owned())
             .arg(Value::from(parameters.domain))
@@ -164,12 +150,8 @@ impl<'a> ApiClient {
             .arg(Value::Struct(BTreeMap::from(parameters.record)));
 
         match self.call(xml_client) {
-            Ok(res) => {
-                Ok(())
-            },
-            Err(err) => {
-                Ok(())
-            }
+            Ok(res) => Ok(res),
+            Err(_err) => Err("Failed to update_zone_record"),
         }
     }
 }

@@ -1,64 +1,46 @@
 extern crate clap;
+extern crate serde;
+extern crate serde_json;
+extern crate xmlrpc;
+extern crate reqwest;
+
 use clap::{Arg, App, SubCommand};
-use std::env;
 
-mod api;
+mod loopia;
 mod util;
+mod formatter;
+mod command;
+mod config;
 
-use api::{
-    ApiClient,
-    GetZoneRecordsRequest,
+use loopia::{
     ZoneRecord,
-    AddZoneRecordRequest,
-    UpdateZoneRecordRequest,
-};
-use util::*;
-
-struct Configuration {
-    username: String,
-    password: String,
-}
-
-fn load_configuration() -> Configuration {
-    Configuration {
-        username: env::var("LOOPIA_USERNAME").unwrap_or(String::from("")),
-        password: env::var("LOOPIA_PASSWORD").unwrap_or(String::from("")),
+    api::{
+        ApiClient,
+        GetZoneRecordsRequest,
+        AddZoneRecordRequest,
+        UpdateZoneRecordRequest,
     }
-}
+};
+use formatter::JSONOutputFormatter;
+use config::Config;
 
 fn main() {
-    let configuration = load_configuration();
+    let config = Config::default();
     let client = ApiClient::new(
-        configuration.username,
-        configuration.password,
+        config.username,
+        config.password,
     );
-
-    let add_zone_record_command = SubCommand::with_name("add-zone-record")
-        .arg(domain_argument())
-        .arg(subdomain_argument())
-        .arg(type_argument())
-        .arg(ttl_argument())
-        .arg(priority_argument())
-        .arg(Arg::with_name("VALUE").required(true));
-
-    let update_zone_record_command = SubCommand::with_name("update-zone-record")
-        .arg(id_argument())
-        .arg(domain_argument())
-        .arg(subdomain_argument())
-        .arg(type_argument())
-        .arg(ttl_argument())
-        .arg(priority_argument())
-        .arg(Arg::with_name("VALUE").required(true));
 
     let matches = App::new("Loopia CLI")
         .about("Loopia CLI that wraps XMLRPC")
         .subcommand(SubCommand::with_name("get-zone-records")
+            .arg(util::format_argument())
             .arg(Arg::with_name("domain")
                 .index(1))
             .arg(Arg::with_name("subdomain")
                 .index(2)))
-        .subcommand(add_zone_record_command)
-        .subcommand(update_zone_record_command)
+        .subcommand(command::add_zone_record_command())
+        .subcommand(command::update_zone_record_command())
         .get_matches();
 
     match matches.subcommand() {
@@ -69,10 +51,16 @@ fn main() {
                 customer_number: None
             };
 
-            for record in client.get_zone_records(&request) {
-                println!("{:#?}", record);
+            match client.get_zone_records(&request) {
+                Ok(records) => {
+                    if let Err(err) = JSONOutputFormatter::write(&records) {
+                        eprintln!("Error: {:?}", err);
+                    }
+                },
+                Err(err) => eprintln!("Failed fetching zone records with err: {:?}", err),
             }
        },
+
        ("add-zone-record", Some(command)) => {
            let request = AddZoneRecordRequest {
                customer_number: None,
@@ -92,6 +80,7 @@ fn main() {
                Err(err) => eprintln!("{:#?}", err),
            };
        },
+
        ("update-zone-record", Some(command)) => {
            let request = UpdateZoneRecordRequest {
                customer_number: None,

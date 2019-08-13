@@ -1,5 +1,12 @@
 use clap::Arg;
 
+pub fn format_argument<'a, 'b>() -> Arg<'a, 'b> {
+    Arg::with_name("format")
+        .long("format")
+        .default_value("json")
+        .takes_value(true)
+}
+
 pub fn id_argument<'a, 'b>() -> Arg<'a, 'b> {
     Arg::with_name("id")
         .long("id")
