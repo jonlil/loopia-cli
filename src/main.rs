@@ -1,8 +1,6 @@
 extern crate clap;
 use clap::{Arg, App, SubCommand};
-
-#[macro_use]
-extern crate dotenv_codegen;
+use std::env;
 
 mod api;
 mod util;
@@ -16,10 +14,23 @@ use api::{
 };
 use util::*;
 
+struct Configuration {
+    username: String,
+    password: String,
+}
+
+fn load_configuration() -> Configuration {
+    Configuration {
+        username: env::var("LOOPIA_USERNAME").unwrap_or(String::from("")),
+        password: env::var("LOOPIA_PASSWORD").unwrap_or(String::from("")),
+    }
+}
+
 fn main() {
+    let configuration = load_configuration();
     let client = ApiClient::new(
-        String::from(dotenv!("LOOPIA_USERNAME")),
-        String::from(dotenv!("LOOPIA_PASSWORD"))
+        configuration.username,
+        configuration.password,
     );
 
     let add_zone_record_command = SubCommand::with_name("add-zone-record")
