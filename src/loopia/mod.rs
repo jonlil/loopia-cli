@@ -1,31 +1,12 @@
-use std::iter::FromIterator;
 use serde::Serialize;
 
 pub mod api;
 
 #[derive(Debug, Serialize)]
-pub struct ZoneRecords(Vec<ZoneRecord>);
-
-impl ZoneRecords {
-    pub fn new() -> Self {
-        Self(vec![])
-    }
-
-    fn add(&mut self, elem: ZoneRecord) {
-        self.0.push(elem);
-    }
-}
-
-impl FromIterator<ZoneRecord> for ZoneRecords {
-    fn from_iter<I: IntoIterator<Item=ZoneRecord>>(iter: I) -> Self {
-        let mut c = ZoneRecords::new();
-
-        for i in iter {
-            c.add(i);
-        }
-
-        c
-    }
+pub struct ZoneRecords<'a> {
+    domain: &'a str,
+    subdomain: &'a str,
+    records: Vec<ZoneRecord>
 }
 
 #[derive(Debug, Serialize)]
@@ -46,22 +27,26 @@ mod test {
     fn test_serialize_zone_records() {
         assert_eq!(
             true,
-            serde_json::to_string(&ZoneRecords(vec![
-                ZoneRecord {
-                    id: Some(1234),
-                    data: "spf".to_string(),
-                    ttl: 300,
-                    priority: 0,
-                    type_: "TXT".to_string(),
-                },
-                ZoneRecord {
-                    id: Some(1235),
-                    data: "some_weird_value".to_string(),
-                    ttl: 300,
-                    priority: 0,
-                    type_: "TXT".to_string(),
-                },
-            ])).is_ok(),
+            serde_json::to_string(&ZoneRecords {
+                domain: "example.com",
+                subdomain: "www",
+                records: vec![
+                    ZoneRecord {
+                        id: Some(1234),
+                        data: "spf".to_string(),
+                        ttl: 300,
+                        priority: 0,
+                        type_: "TXT".to_string(),
+                    },
+                    ZoneRecord {
+                        id: Some(1235),
+                        data: "some_weird_value".to_string(),
+                        ttl: 300,
+                        priority: 0,
+                        type_: "TXT".to_string(),
+                    },
+                ]
+            }).is_ok(),
         );
     }
 }

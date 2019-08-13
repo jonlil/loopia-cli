@@ -75,7 +75,7 @@ impl<'a> ApiClient {
             .arg(Value::from(self.password.to_owned()))
     }
 
-    pub fn get_zone_records<'b>(&self, parameters: &GetZoneRecordsRequest) -> Result<ZoneRecords, String> {
+    pub fn get_zone_records(&self, parameters: &'a GetZoneRecordsRequest) -> Result<ZoneRecords<'a>, String> {
         let xml_client = self.xml_client("getZoneRecords")
             .arg(customer_number(parameters.customer_number).to_owned())
             .arg(Value::from(parameters.domain))
@@ -84,7 +84,7 @@ impl<'a> ApiClient {
         match xml_client.call_url(self.url.to_owned()) {
             Ok(res) => {
                 if let Some(result) = res.as_array() {
-                    Ok(result.iter().map(|x| {
+                    let records = result.iter().map(|x| {
                         ZoneRecord {
                             id: Some(x["record_id"].as_i32().unwrap()),
                             data: x["rdata"].as_str().unwrap().to_string(),
@@ -93,7 +93,13 @@ impl<'a> ApiClient {
                             type_: x["type"].as_str().unwrap().to_string()
                         }
                     })
-                    .collect::<ZoneRecords>())
+                    .collect::<Vec<ZoneRecord>>();
+
+                    Ok(ZoneRecords {
+                        domain: parameters.domain,
+                        subdomain: parameters.subdomain,
+                        records: records,
+                    })
                 } else {
                     panic!("Failed executing: getZoneRecords")
                 }
