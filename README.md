@@ -17,7 +17,7 @@ $ loopia-cli help
 Loopia CLI that wraps XMLRPC
 
 USAGE:
-    loopia [SUBCOMMAND]
+    loopia-cli [SUBCOMMAND]
 
 FLAGS:
     -h, --help       Prints help information
