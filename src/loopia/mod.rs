@@ -1,6 +1,10 @@
 use serde::Serialize;
 
 pub mod api;
+pub mod error;
+mod transport;
+
+use loopia::transport::LoopiaTransport as Transport;
 
 #[derive(Debug, Serialize)]
 pub struct ZoneRecords<'a> {
