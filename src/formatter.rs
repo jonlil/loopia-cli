@@ -1,6 +1,6 @@
 use std::io::{self};
-use serde::Serialize;
 use serde_json::Result;
+use serde::Serialize;
 
 pub struct JSONOutputFormatter;
 

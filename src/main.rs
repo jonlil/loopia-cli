@@ -5,12 +5,14 @@ extern crate xmlrpc;
 extern crate reqwest;
 
 use clap::{Arg, App, SubCommand};
+use std::process;
 
 mod loopia;
 mod util;
 mod formatter;
 mod command;
 mod config;
+mod error;
 
 use loopia::{
     ZoneRecord,
@@ -55,9 +57,17 @@ fn main() {
                 Ok(records) => {
                     if let Err(err) = JSONOutputFormatter::write(&records) {
                         eprintln!("Error: {:?}", err);
+                        process::exit(1);
                     }
                 },
-                Err(err) => eprintln!("Failed fetching zone records with err: {:?}", err),
+                Err(err) => {
+                    if let Err(err) = JSONOutputFormatter::write(&err) {
+                        eprintln!("Error: {:?}", err);
+                        process::exit(1);
+                    } else {
+                        process::exit(1);
+                    }
+                }
             }
        },
 
