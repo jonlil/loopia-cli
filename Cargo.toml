@@ -5,7 +5,7 @@ authors = ["Jonas Liljestrand <jonas.liljestrand@gmail.com>"]
 
 [dependencies]
 xmlrpc = "0.13.1"
-reqwest = "0.9.19"
+reqwest = "0.10.5"
 clap = "2.30.0"
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
